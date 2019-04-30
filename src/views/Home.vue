@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <a class="btn-form" @click="clearConversation()">Clear All</a>
     <TitleInfo title="YodaBot"/>
     <div class="conversation-container"> 
       <div id="conversation"> 
@@ -45,7 +46,9 @@ export default class Home extends Vue {
   
   private async submit() {
     this.isWriting = true;
-    this.messages.push(new Message(this.question,'-','question'));
+
+    const message = new Message(this.question,'-','question');
+    this.saveMessage(message);
     
     if (this.question.includes('force')) {
       this.getMovies();
@@ -64,7 +67,9 @@ export default class Home extends Vue {
         answer.push(a.title);
       }
       let text: string = 'The force is in this movies: ' + answer.join(', ');
-      this.messages.push(new Message(text,'-', 'answer'));
+      const message = new Message(text,'-', 'answer')
+      this.saveMessage(message);
+
       this.isWriting = false;
     })
     .catch(error => {
@@ -81,7 +86,9 @@ export default class Home extends Vue {
       }
       let text: string = 'I have not found any results. But here there is a list of some Star Wars characters: ' 
       + answer.join(', ');
-      this.messages.push(new Message(text,'-', 'answer'));
+
+      const message = new Message(text,'-', 'answer')
+      this.saveMessage(message);
       this.isWriting = false;
     })
     .catch(error => {
@@ -99,14 +106,12 @@ export default class Home extends Vue {
           this.getRandomCharacters();
         }
         else {
-          this.messages.push(message);
+          this.saveMessage(message);
           this.isWriting = false;
         }
       })
       .catch(error => {
         console.log(error)
-        // get new session token
-        // try again sendMessage
       })
   }
 
@@ -118,6 +123,33 @@ export default class Home extends Vue {
       }
     }
     return false;
+  }
+
+  private getSessionInfo() {
+    const sessionInfo = sessionStorage.getItem('messages');
+    if (sessionInfo) {
+      return JSON.parse(sessionInfo);
+    } else {
+      sessionStorage.setItem('messages', JSON.stringify([]));
+      return [];
+    }
+  }
+
+  private saveMessage(message: Message){
+    this.messages.push(message);
+    const session = this.getSessionInfo();
+    session.push(message);
+    sessionStorage.setItem('messages', JSON.stringify(session));
+  }
+
+  private clearConversation (){
+    sessionStorage.clear();
+    this.messages = [];
+  }
+
+
+  mounted() {
+    this.messages = this.getSessionInfo();
   }
 }
 </script>
@@ -165,4 +197,5 @@ export default class Home extends Vue {
   .yoda {
     color:#62704c;
   }
+
 </style>
