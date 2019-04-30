@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <a class="btn-form" @click="clearConversation()">Clear All</a>
+    <a class="input btn-form" @click="clearConversation()">Clear All</a>
     <TitleInfo title="YodaBot"/>
     <div class="conversation-container"> 
       <div id="conversation"> 
